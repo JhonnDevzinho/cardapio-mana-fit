@@ -1,0 +1,8 @@
+{
+  "name": "mana-fit-house",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cardápio web da Maná Fit House (site estático + funções de pagamento na Vercel)",
+  "dependencies": { "firebase-admin": "^12.0.0" },
+  "engines": { "node": "22.x" }
+}

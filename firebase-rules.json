@@ -1,0 +1,26 @@
+{
+  "rules": {
+    "config": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "orders": {
+      ".indexOn": [
+        "at"
+      ],
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$id": {
+        ".read": true,
+        ".write": "!data.exists() && newData.child('st').val() === 0",
+        ".validate": "newData.hasChildren(['at','items','total','st','pay']) && (auth != null || (newData.child('paid').val() === 0 && !newData.child('plink').exists() && !newData.child('late').exists()))",
+        "cancelled": {
+          ".write": "!data.exists() && newData.val() === 1 && data.parent().child('paid').val() === 0 && data.parent().child('st').val() === 0 && !data.parent().child('plink').exists()"
+        },
+        "plink": {
+          ".validate": "newData.isString() && newData.val().matches(/^https:\\/\\/.+/)"
+        }
+      }
+    }
+  }
+}
