@@ -20,7 +20,7 @@ const LINK_CREDITO='',LINK_DEBITO='';
 /* ===== Pagamento automático (Mercado Pago) ===== */
 // Chave PÚBLICA do Mercado Pago (APP_USR-...). Preenchida = Pix com confirmação automática + cartão no site.
 // Vazia = modo simples (Pix estático com a chave acima + confirmação manual pelo lojista).
-const MP_PUBLIC_KEY='APP_USR-a80183cd-5dd6-486f-bd4d-b3b4c4f292aa';
+const MP_PUBLIC_KEY='TEST-91b370bb-168b-49c1-aaaf-5e39b3f39c6b';
 const API_URL=''; // vazio = mesma origem do site (/api/...)
 // true  = o Pix é gerado pelo Mercado Pago e confirmado AUTOMATICAMENTE (cai na conta do Mercado Pago; tem taxa de Pix dele).
 // false = o Pix vai direto na sua chave (PIX_CHAVE) e o lojista confirma manualmente.
