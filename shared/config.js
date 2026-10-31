@@ -6,7 +6,7 @@
    4) HORARIO, RETIRADA e LOJA_ENDERECO -> ajuste para a sua loja
    Deixe DEMO_CARTAO = false. Vazio em FB/MP_PUBLIC_KEY = modo local de teste.
    ===================================================================== */
-const FB={url:'',key:''};
+const FB={url:'https://mana-fit-house-default-rtdb.firebaseio.com',key:'AIzaSyCAMAGQH6kUtl45CJYepj3I_EoogaMo0d8'};
 const LOGO_URL='../shared/logo.jpg'; // logo/foto de perfil da loja
 
 /* ===== Pagamentos ===== */
@@ -29,7 +29,7 @@ const PIX_VIA_MP=true;
 
 /* ===== Retirada no local ===== */
 const RETIRADA={min:15,max:25};      // tempo de preparo para retirada (minutos)
-const LOJA_ENDERECO='';              // endereço da loja, mostrado ao cliente na retirada (opcional)
+const LOJA_ENDERECO='Rua Dr. Pedro Amorim';              // endereço da loja, mostrado ao cliente na retirada (opcional)
 
 /* ===== Demonstração ===== */
 // true = mostra um formulário de cartão SIMULADO (não cobra nada). Use só para apresentar o site; deixe false em produção.
