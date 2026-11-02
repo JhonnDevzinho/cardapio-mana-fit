@@ -15,6 +15,9 @@ function db() {
 }
 
 async function mp(path, opt = {}) {
+  console.log('Token disponível:', Boolean(process.env.MP_ACCESS_TOKEN));
+  console.log('Tamanho do token:', process.env.MP_ACCESS_TOKEN?.length || 0);
+
   const r = await fetch('https://api.mercadopago.com' + path, {
     ...opt,
     headers: { Authorization: 'Bearer ' + process.env.MP_ACCESS_TOKEN, 'Content-Type': 'application/json', ...(opt.headers || {}) },
