@@ -23,8 +23,16 @@ async function mp(path, opt = {}) {
     headers: { Authorization: 'Bearer ' + process.env.MP_ACCESS_TOKEN, 'Content-Type': 'application/json', ...(opt.headers || {}) },
   });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw Object.assign(new Error(j.message || 'Erro no Mercado Pago'), { status: r.status, body: j });
-  return j;
+
+if (!r.ok) {
+  console.error('MP status:', r.status);
+  console.error('MP request-id:', r.headers.get('x-request-id'));
+  console.error('MP resposta:', JSON.stringify(j));
+
+  throw Object.assign(new Error(j.message || 'Erro no Mercado Pago'), {
+    status: r.status,
+    body: j
+  });
 }
 
 const base = (req) => process.env.SITE_URL || 'https://' + req.headers.host;
@@ -79,3 +87,5 @@ function fail(res, e) {
 }
 
 module.exports = { db, mp, base, bad, loadOrder, amount, fail };
+
+}
