@@ -35,7 +35,7 @@ async function mp(path, opt = {}) {
     console.error('MP status:', r.status);
     console.error('MP request-id:', r.headers.get('x-request-id'));
     console.error('MP resposta:', JSON.stringify(j));
-
+    
     throw Object.assign(new Error(j.message || 'Erro no Mercado Pago'), {
       status: r.status,
       body: j,
@@ -43,10 +43,9 @@ async function mp(path, opt = {}) {
   }
 
   return j;
-}
+} //fecha a função mp()
 
-const base = (req) =>
-  process.env.SITE_URL || 'https://' + req.headers.host;
+const base = (req) => process.env.SITE_URL || 'https://' + req.headers.host;
 
 async function loadOrder(id) {
   if (!/^[a-z0-9]{10}$/.test(String(id))) {
