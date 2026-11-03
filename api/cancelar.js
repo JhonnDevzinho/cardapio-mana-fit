@@ -24,5 +24,18 @@ module.exports = async (req, res) => {
     }
     await ref.update({ cancelled: 1, cancelledAt: Date.now() });
     res.json({ cancelled: true });
-  } catch (e) { fail(res, e); }
+  } catch (e) {
+  console.error('TIPO DE FAIL:', typeof fail);
+  console.error('EXPORTAÇÕES DO LIB:', Object.keys(require('./_lib')));
+
+  if (typeof fail === 'function') {
+    return fail(res, e);
+  }
+
+  return res.status(500).json({
+    error: 'Falha ao carregar função fail',
+    failType: typeof fail,
+    exports: Object.keys(require('./_lib')),
+  });
+}
 };
