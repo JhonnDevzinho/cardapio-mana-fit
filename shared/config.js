@@ -2,12 +2,12 @@
    CONFIGURAÇÃO - preencha ANTES de publicar (passo a passo no LEIA-ME.md)
    1) FB.url e FB.key  -> do Firebase (URL do Realtime Database e Web API Key)
    2) MP_PUBLIC_KEY    -> Public Key do Mercado Pago
-   3) PIX_CHAVE        -> só é usada como plano B do Pix
+   3) PIX_CHAVE        -> chave bancária que recebe o Pix direto
    4) HORARIO, RETIRADA e LOJA_ENDERECO -> ajuste para a sua loja
-   Deixe DEMO_CARTAO = false. Vazio em FB/MP_PUBLIC_KEY = modo local de teste.
+   Deixe DEMO_CARTAO = false. Sem credenciais do Mercado Pago, cartões ficam desativados.
    ===================================================================== */
 const FB={url:'https://mana-fit-house-default-rtdb.firebaseio.com',key:'AIzaSyCAMAGQH6kUtl45CJYepj3I_EoogaMo0d8'};
-const LOGO_URL='../shared/logo.jpg'; // logo/foto de perfil da loja
+const LOGO_URL='../shared/logo-round.png'; // logo/foto de perfil da loja
 
 /* ===== Pagamentos ===== */
 // Chave Pix exatamente como cadastrada no banco. Celular: +55 + DDD + 9 dígitos (ex.: +5584999999999);
@@ -18,13 +18,10 @@ const PIX_NOME='MANA FIT HOUSE',PIX_CIDADE='BRASIL'; // sem acentos
 const LINK_CREDITO='',LINK_DEBITO='';
 
 /* ===== Pagamento automático (Mercado Pago) ===== */
-// Chave PÚBLICA do Mercado Pago (APP_USR-...). Preenchida = Pix com confirmação automática + cartão no site.
-// Vazia = modo simples (Pix estático com a chave acima + confirmação manual pelo lojista).
-const MP_PUBLIC_KEY='TEST-91b370bb-168b-49c1-aaaf-5e39b3f39c6b';
+// Chave pública de PRODUÇÃO do Mercado Pago (APP_USR-...). Não use credenciais TEST aqui.
+const MP_PUBLIC_KEY='APP_USR-a80183cd-5dd6-486f-bd4d-b3b4c4f292aa';
 const API_URL=''; // vazio = mesma origem do site (/api/...)
-// true  = o Pix é gerado pelo Mercado Pago e confirmado AUTOMATICAMENTE (cai na conta do Mercado Pago; tem taxa de Pix dele).
-// false = o Pix vai direto na sua chave (PIX_CHAVE) e o lojista confirma manualmente.
-// Só vale com FB e MP_PUBLIC_KEY preenchidos; sem isso o site usa o Pix da sua chave.
+// Pix e cartões no Mercado Pago. As rotas de cobrança exigem MP_LIVE_MODE=true na Vercel.
 const PIX_VIA_MP=true;
 
 /* ===== Retirada no local ===== */

@@ -5,6 +5,12 @@ const { db, mp, base, bad, loadOrder, amount, fail } = require('./_lib');
 module.exports = async (req, res) => {
   try {
     if (req.method !== 'POST') return res.status(405).end();
+    if (process.env.MP_LIVE_MODE !== 'true') {
+      throw Object.assign(
+        new Error('Cartão do Mercado Pago desativado até a configuração de credenciais de produção.'),
+        { status: 503 }
+      );
+    }
     const b = req.body || {};
     if (!b.token || !b.payment_method_id) throw bad('Dados do cartão ausentes');
     const { order, products } = await loadOrder(b.orderId);

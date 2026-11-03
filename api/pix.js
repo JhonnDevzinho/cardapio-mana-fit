@@ -10,6 +10,12 @@ const exp30 = () => new Date(Date.now() + 30 * 60 * 1000 - 3 * 3600 * 1000).toIS
 module.exports = async (req, res) => {
   try {
     if (req.method !== 'POST') return res.status(405).end();
+    if (process.env.MP_LIVE_MODE !== 'true') {
+      throw Object.assign(
+        new Error('Pix do Mercado Pago desativado até a configuração de credenciais de produção.'),
+        { status: 503 }
+      );
+    }
     const { orderId, renew, action } = req.body || {};
     const { order, products } = await loadOrder(orderId);
     if (order.paid) return res.json({ paid: true });
