@@ -11,10 +11,14 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Inscrição push inválida' });
     }
     const database = db();
+    const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+    if (!token) return res.status(401).json({ error: 'Autenticação necessária' });
+    const decoded = await require('firebase-admin').auth().verifyIdToken(token);
     if (role === 'merchant') {
-      const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-      if (!token) return res.status(401).json({ error: 'Autenticação necessária' });
-      await require('firebase-admin').auth().verifyIdToken(token);
+      const merchantEmail = String(process.env.MERCHANT_EMAIL || '').trim().toLowerCase();
+      if (!merchantEmail || String(decoded.email || '').toLowerCase() !== merchantEmail) {
+        return res.status(403).json({ error: 'Acesso restrito ao lojista' });
+      }
     }
     await database.ref(`push/${role}/${deviceId}`).set({ subscription, updatedAt: Date.now() });
     return res.status(200).json({ ok: true });

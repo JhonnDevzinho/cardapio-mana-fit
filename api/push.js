@@ -48,7 +48,11 @@ module.exports = async (req, res) => {
     } else if (event === 'status') {
       const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
       if (!token) return res.status(401).json({ error: 'Autenticação necessária' });
-      await admin.auth().verifyIdToken(token);
+      const decoded = await admin.auth().verifyIdToken(token);
+      const merchantEmail = String(process.env.MERCHANT_EMAIL || '').trim().toLowerCase();
+      if (!merchantEmail || String(decoded.email || '').toLowerCase() !== merchantEmail) {
+        return res.status(403).json({ error: 'Acesso restrito ao lojista' });
+      }
       const currentStatus = Math.max(0, Math.min(3, Number(order.st) || 0));
       if (!order.uid || currentStatus === 0) return res.status(200).json({ ok: true, skipped: true });
       const claimRef = database.ref(`push/events/status/${orderId}/${currentStatus}`);

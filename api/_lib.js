@@ -165,11 +165,7 @@ function fail(res, e) {
   );
 
   res
-    .status(
-      e && e.status && e.status < 500
-        ? 400
-        : 500
-    )
+    .status(e && e.status && e.status < 500 ? e.status : 500)
     .json({
       error: e.message || 'Erro',
     });

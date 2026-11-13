@@ -2,29 +2,31 @@
   "rules": {
     "config": {
       ".read": true,
-      ".write": "auth != null"
+      ".write": false
     },
     "orders": {
       ".indexOn": [
         "at"
       ],
-      ".read": "auth != null",
-      ".write": "auth != null",
       "$id": {
-        ".read": true,
-        ".write": "!data.exists() && newData.child('st').val() === 0",
+        ".read": "auth != null && auth.uid === data.child('ownerUid').val()",
+        ".write": "!data.exists() && auth != null && auth.uid === newData.child('ownerUid').val() && newData.child('st').val() === 0",
         ".validate": "newData.hasChildren(['at','items','total','st','pay']) && (auth != null || (newData.child('paid').val() === 0 && !newData.child('plink').exists() && !newData.child('late').exists()))",
         "cancelled": {
           ".write": "!data.exists() && newData.val() === 1 && data.parent().child('paid').val() === 0 && data.parent().child('st').val() === 0 && !data.parent().child('plink').exists()"
         },
         "plink": {
           ".validate": "newData.isString() && newData.val().matches(/^https:\\/\\/.+/)"
+        },
+        "st": {
+          ".write": "auth != null && auth.uid === data.parent().child('ownerUid').val() && data.parent().child('mode').val() === 'entrega' && data.val() === 2 && newData.val() === 3",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3"
         }
       }
     },
     "push": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": false,
+      ".write": false
     }
   }
 }
