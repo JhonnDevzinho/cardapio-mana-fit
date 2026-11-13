@@ -13,7 +13,7 @@ const LOGO_URL='../shared/logo-round.png'; // logo/foto de perfil da loja
 /* ===== Pagamentos ===== */
 // Chave Pix exatamente como cadastrada no banco. Celular: +55 + DDD + 9 dígitos (ex.: +5584999999999);
 // também vale CPF/CNPJ (só números), e-mail ou chave aleatória. Se for inválida, o Pix some do site (modo simples).
-const PIX_CHAVE='+5584998948092';
+const PIX_CHAVE='283a1527-d7b4-43d4-a282-ba0814e5050a';
 const PIX_NOME='MANA FIT HOUSE',PIX_CIDADE='BRASIL'; // sem acentos
 // Opcional (só sem Mercado Pago): link de pagamento de outro gateway, com {valor} e {pedido}. Pode deixar vazio.
 const LINK_CREDITO='',LINK_DEBITO='';
@@ -36,3 +36,4 @@ const DEMO_CARTAO=false;
 /* ===== Horário de funcionamento ===== */
 const HORARIO={abre:'08:00',fecha:'20:00'}; // fora desse horário o site mostra "Fechado" e não aceita pedidos
 const FUSO='America/Fortaleza';
+
