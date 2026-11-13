@@ -7,6 +7,7 @@
    Deixe DEMO_CARTAO = false. Sem credenciais do Mercado Pago, cartões ficam desativados.
    ===================================================================== */
 const FB={url:'https://mana-fit-house-default-rtdb.firebaseio.com',key:'AIzaSyCAMAGQH6kUtl45CJYepj3I_EoogaMo0d8'};
+const PUSH_VAPID_PUBLIC_KEY='BL1QTGlvdlghYJH5Z070CC3M3FtvKxJcVsL-CuI1oWeAqNFq7CGiBvFjtmR3YaQDrYyi0_f7Z1L3qRf5l0TUoJA';
 const LOGO_URL='../shared/logo-round.png'; // logo/foto de perfil da loja
 
 /* ===== Pagamentos ===== */

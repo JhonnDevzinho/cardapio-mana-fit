@@ -1,0 +1,17 @@
+{
+  "name": "Maná Fit House",
+  "short_name": "Maná Fit",
+  "start_url": "/cliente/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2d6a4f",
+  "icons": [
+    {
+      "src": "/shared/logo-round.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

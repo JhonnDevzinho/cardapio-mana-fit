@@ -21,6 +21,10 @@
           ".validate": "newData.isString() && newData.val().matches(/^https:\\/\\/.+/)"
         }
       }
+    },
+    "push": {
+      ".read": "auth != null",
+      ".write": "auth != null"
     }
   }
 }
