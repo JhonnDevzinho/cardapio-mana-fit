@@ -35,6 +35,8 @@ S.cats.forEach(c=>{const l=pr.filter(p=>p.cat===c.id);if(l.length)h+=`<h2 id="c-
 return h||'<p class="em">Nenhum produto encontrado.</p>'}
 const foot=()=>`<div class="foot">Maná Fit House - 2026. Todos os direitos reservados<br>Cardápio digital${window.Admin?'<br><button data-a="lj" style="color:#fff;opacity:.75;text-decoration:underline;font-size:11px">Área do lojista</button>':''}</div>`;
 function cartTotal(){return S.cart.reduce((a,i)=>a+i.total,0)}
+function cartCount(){return S.cart.reduce((n,i)=>n+(+i.q||0),0)}
+function cartProductImage(i){const p=S.products.find(p=>p.id===i.pid);return img(p||{img:i.photo,em:i.em||'🍽️'})}
 function render(){const m=$('#m');let h='';
 if(tab==='home')h=`<div class="cover">MANÁ FIT HOUSE</div><div class="info"><img class="logo" src="${LOGO_URL}" alt="Maná Fit House"><h1>Maná Fit House</h1><p>📍 Comida saudável • Mais informações</p>${statusH()}</div>
 <div class="row">📍<div><b>Entrega: ${R(DEL.fee)}</b><span>${DEL.min} a ${DEL.max} minutos • Retirada no local: sem taxa</span></div></div>
@@ -42,9 +44,9 @@ if(tab==='home')h=`<div class="cover">MANÁ FIT HOUSE</div><div class="info"><im
 <div class="bar" id="bar"><img class="mini" src="${LOGO_URL}" alt=""><button class="sb" data-a="s">🔍</button></div>
 <div id="sw" hidden><input id="q" placeholder="Buscar no cardápio" value="${esc(qs)}"></div><div id="list">${listH()}</div>${foot()}`;
 else h=ordersH();
-m.innerHTML=h+(adm&&tab==='home'?'<button class="fab" data-a="new">＋ Novo produto</button>':'');
+m.innerHTML=h+(!adm&&tab==='home'&&S.cart.length?`<button class="cart-cta" data-t="orders" aria-label="Abrir sacola com ${cartCount()} ${cartCount()===1?'item':'itens'}"><span class="cart-cta-icon" aria-hidden="true">🛍️</span><span class="cart-cta-copy"><b>Minha sacola</b><small>${cartCount()} ${cartCount()===1?'item':'itens'} • ${R(cartTotal())}</small></span><span class="cart-cta-link">Ver sacola <span aria-hidden="true">›</span></span></button>`:'')+(adm&&tab==='home'?'<button class="fab" data-a="new">＋ Novo produto</button>':'');
 document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
-const n=$('#cn');n.textContent=S.cart.length;n.hidden=!S.cart.length;if($('#sw')&&qs)$('#sw').hidden=false}
+const n=$('#cn');n.textContent=cartCount();n.hidden=!S.cart.length;if($('#sw')&&qs)$('#sw').hidden=false}
 let LOCK=0;const open=h=>{LOCK=0;const s=$('#sh'),t=s.querySelector('.sc')?.scrollTop||0;s.innerHTML=h;const c=s.querySelector('.sc');if(c)c.scrollTop=t;$('#ov').classList.add('on')},close=()=>{LOCK=0;$('#ov').classList.remove('on')};
 function selN(){return Object.values(cur.sel).reduce((a,b)=>a+b,0)}
 function tot(){const{p,q,sel}=cur;return(has(p)?p.opts.reduce((a,o,i)=>a+(sel[i]||0)*o.p,0):p.price)*q}
@@ -53,7 +55,7 @@ open(`<div class="sc"><div style="position:relative"><div class="im big">${img(p
 ${has(p)?`<div class="gh"><b>Escolha uma opção:</b><span class="cnt${n?' ok':''}">${n}/${MAX}</span><em>OBRIGATÓRIO</em><small>Escolha de 1 a ${MAX} opções</small></div>${p.opts.map((o,i)=>`<div class="op"><div>${esc(o.n)}<small>+ ${R(o.p)}</small></div>${o.so?'<span class="fa">EM FALTA</span>':`<div class="st">${sel[i]?`<button data-m="${i}">−</button><span>${sel[i]}</span>`:''}<button data-p="${i}" ${n>=MAX?'disabled':''}>+</button></div>`}</div>`).join('')}`:''}
 <div class="pad"><label>Alguma observação? <span>${(obs||'').length} / 140</span></label><textarea id="obs" maxlength="140" oninput="this.previousElementSibling.lastChild.textContent=this.value.length+' / 140'">${esc(obs||'')}</textarea></div></div>
 <div class="ft"><div class="st"><button data-q="-1" ${q<2?'disabled':''}>−</button><span>${q}</span><button data-q="1">+</button></div><button class="btn" data-a="add" ${ok?'':'disabled'}>Adicionar<span>${R(tot())}</span></button></div>`)}
-function addCart(){cur.obs=$('#obs').value;const{p,q,sel,obs}=cur;S.cart.push({pid:p.id,sel:{...sel},name:p.name,q,total:tot(),obs,opts:has(p)?p.opts.map((o,i)=>sel[i]?`${sel[i]}x ${o.n}`:'').filter(Boolean):[]});save();close();render();toast('Adicionado à sacola')}
+function addCart(){cur.obs=$('#obs').value;const{p,q,sel,obs}=cur;S.cart.push({pid:p.id,em:p.em||'🍽️',sel:{...sel},name:p.name,q,total:tot(),obs,opts:has(p)?p.opts.map((o,i)=>sel[i]?`${sel[i]}x ${o.n}`:'').filter(Boolean):[]});save();close();render();toast('Adicionado à sacola')}
 function editor(id){const p=id?S.products.find(x=>x.id===id):null;ed=p?{...p}:{cat:S.cats[0]?.id,em:'🍽️'};delArm=0;
 open(`<div class="sc"><div class="pad f"><h3>${p?'Editar produto':'Novo produto'}</h3>
 <label>Nome</label><input id="f-n" value="${esc(ed.name)}"><label>Descrição</label><textarea id="f-d">${esc(ed.desc)}</textarea>
@@ -202,7 +204,7 @@ const oc=o=>{if(o.cancelled)return ocCancel(o);const s=stl(o);return`<div class=
 <p style="color:var(--mu);font-size:12px;margin-bottom:6px">${o.st>=3?'Pedido finalizado':'Previsão: '+o.eta+' min'} • ${o.mode==='entrega'?'Entrega'+(o.zone?' - '+esc(o.zone):''):'Retirada'}</p>${o.items.map(i=>`<small style="display:block">${i.q}x ${esc(i.name)}${(i.opts||[]).length?' ('+esc((i.opts||[]).join(', '))+')':''}</small>`).join('')}<p style="margin-top:6px"><b>${R(o.total)}</b></p>
 ${adm?payAdm(o):payH(o)}${adm?`<small style="display:block;color:var(--mu)">${esc(o.name)}${o.addr?' • '+esc(o.addr):''}</small>${o.st<3&&(o.mode==='retirada'||o.st<2)?`<button class="btn" data-a="adv" data-i="${o.id}" data-u="${o.uid||''}" style="margin-top:8px;justify-content:center">Avançar: ${s[o.st+1]}</button>`:''}`:o.mode==='entrega'&&o.st===2?`<button class="btn" data-a="confirm-delivery" data-i="${o.id}" style="margin-top:8px;justify-content:center">Confirmar que recebi o pedido</button>`:''}</div>`};
 function ordersH(){const os=orders();let h=noticeButton();
-if(S.cart.length)h+=`<h2>Sacola</h2><div class="pad" style="padding-top:0">${S.cart.map((i,x)=>`<div class="cl"><div><b>${i.q}x ${esc(i.name)}</b>${i.opts.map(o=>`<small>${esc(o)}</small>`).join('')}${i.obs?`<small>Obs: ${esc(i.obs)}</small>`:''}</div><div style="text-align:right">${R(i.total)}<br><button data-a="rm" data-i="${x}" style="color:#c0392b;font-size:12px">Remover</button></div></div>`).join('')}<p style="text-align:right;margin:14px 0;font-size:16px"><b>Subtotal: ${R(cartTotal())}</b><br><small style="color:var(--mu)">Entrega ou retirada escolhida na finalização</small></p><button class="btn" data-a="chk" style="justify-content:center">Finalizar pedido</button></div>`;
+if(S.cart.length)h+=`<section class="cart-box"><div class="cart-box-head"><h2>🛍️ Minha sacola</h2><span>${cartCount()} ${cartCount()===1?'item':'itens'}</span></div><div class="pad" style="padding-top:0">${S.cart.map((i,x)=>`<div class="cl"><div class="cart-item"><div class="cart-item-photo">${cartProductImage(i)}</div><div class="cart-item-details"><b>${i.q}x ${esc(i.name)}</b>${i.opts.map(o=>`<small>${esc(o)}</small>`).join('')}${i.obs?`<small>Obs: ${esc(i.obs)}</small>`:''}</div></div><div style="text-align:right">${R(i.total)}<br><button data-a="rm" data-i="${x}" style="color:#c0392b;font-size:12px">Remover</button></div></div>`).join('')}<p style="text-align:right;margin:14px 0;font-size:16px"><b>Subtotal: ${R(cartTotal())}</b><br><small style="color:var(--mu)">Entrega ou retirada escolhida na finalização</small></p><button class="btn" data-a="chk" style="justify-content:center">Finalizar pedido</button></div></section>`;
 if(os.length)h+=`<h2>${adm?'Pedidos recebidos':'Acompanhe seu pedido'}</h2>${os.map(oc).join('')}`;
  return h.length>noticeButton().length?h:`${h}<h2>Pedidos</h2><p class="em">Sua sacola está vazia e você ainda não fez pedidos.</p>`}
 const cfgData=()=>({cats:S.cats,products:S.products,zones:S.zones,pick:S.pick});
