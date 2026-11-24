@@ -34,6 +34,5 @@ const LOJA_ENDERECO='Rua Dr. Pedro Amorim';              // endereço da loja, m
 const DEMO_CARTAO=false;
 
 /* ===== Horário de funcionamento ===== */
-const HORARIO={abre:'08:00',fecha:'20:00'}; // fora desse horário o site mostra "Fechado" e não aceita pedidos
+const HORARIO={abre:'08:00',fecha:'18:00'}; // fora desse horário o site mostra "Fechado" e não aceita pedidos
 const FUSO='America/Fortaleza';
-
