@@ -152,3 +152,10 @@ img.mini{width:36px;height:36px;margin:0;border:2px solid var(--cd);display:none
 .cart-cta-link{font-weight:700;font-size:13px;white-space:nowrap}.cart-cta-link span{font-size:20px;vertical-align:-1px}
 .cart-cta:active{transform:translateX(-50%) scale(.98)}
 @media(min-width:768px){.cart-cta{bottom:24px}}
+
+.cart-item{display:flex;align-items:center;gap:10px;min-width:0}
+.cart-item-photo{width:58px;height:58px;display:grid;place-items:center;flex:none;overflow:hidden;border:1px solid var(--bd);border-radius:10px;background:linear-gradient(135deg,#fbe4e3,#e6efd5);font-size:26px}
+.cart-item-photo img{width:100%;height:100%;object-fit:cover}
+.cart-item-details{flex:1;min-width:0}
+.cart-item-details b{display:block}
+.cl>div:last-child{flex:none}
