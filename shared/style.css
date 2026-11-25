@@ -159,3 +159,13 @@ img.mini{width:36px;height:36px;margin:0;border:2px solid var(--cd);display:none
 .cart-item-details{flex:1;min-width:0}
 .cart-item-details b{display:block}
 .cl>div:last-child{flex:none}
+
+.flavor-list{padding:0 14px 8px}
+.flavor-option{width:100%;min-height:52px;display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--cd);text-align:left;font:inherit}
+.flavor-option+.flavor-option{margin-top:8px}
+.flavor-option.on{border:2px solid var(--gr);background:#f2f6e9;padding:9px 11px}
+.flavor-radio{width:20px;height:20px;display:grid;place-items:center;flex:none;border:2px solid #a6a696;border-radius:50%;color:#fff;font-size:12px;font-weight:800}
+.flavor-option.on .flavor-radio{border-color:var(--gr);background:var(--gr)}
+.flavor-name{flex:1;font-weight:600}
+.flavor-option small{color:var(--mu);font-size:11px}
+.flavor-option:disabled{opacity:.55;cursor:not-allowed}
