@@ -23,7 +23,7 @@ function notify(title,body){if(!noticeOn())return;const key=title+'|'+body,now=D
 if('serviceWorker'in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type==='mana-fit-push')notify(e.data.title,e.data.body)});
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){toast('Sem espaço para salvar (imagem grande?)')}if(TOK&&adm)pushCfg()};
 function toast(t){const e=$('#ts');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2200)}
-const has=p=>p.opts&&p.opts.length,base=p=>has(p)?(p.singleChoice?(+p.price||0)+Math.min(...p.opts.filter(o=>!o.so).map(o=>+o.p||0)):(Math.min(...p.opts.filter(o=>!o.so).map(o=>o.p),Infinity)||p.opts[0].p)):p.price;
+const has=p=>!!((p.opts&&p.opts.length)||(p.optionGroups&&p.optionGroups.length)),optionMin=g=>{const prices=(g.options||[]).filter(o=>!o.so).map(o=>+o.p||0);return prices.length?Math.min(...prices):0},base=p=>p.optionGroups&&p.optionGroups.length?(+p.price||0)+p.optionGroups.filter(g=>g.required).reduce((a,g)=>a+optionMin(g),0):has(p)?(p.singleChoice?(+p.price||0)+optionMin({options:p.opts}):(Math.min(...p.opts.filter(o=>!o.so).map(o=>o.p),Infinity)||p.opts[0].p)):p.price;
 const img=p=>p.img?`<img src="${p.img}" alt="">`:(p.em||'🍽️');
 const priceH=p=>has(p)?`A partir de ${R(base(p))}`:p.old>p.price?`<span class="g">${R(p.price)}</span><span class="old">${R(p.old)}</span><span class="pct">-${Math.round((1-p.price/p.old)*100)}%</span>`:R(p.price);
 const edB=p=>adm?`<button class="ed" data-e="${p.id}">✎</button>`:'';
@@ -49,18 +49,19 @@ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dat
 const n=$('#cn');n.textContent=cartCount();n.hidden=!S.cart.length;if($('#sw')&&qs)$('#sw').hidden=false}
 let LOCK=0;const open=h=>{LOCK=0;const s=$('#sh'),t=s.querySelector('.sc')?.scrollTop||0;s.innerHTML=h;const c=s.querySelector('.sc');if(c)c.scrollTop=t;$('#ov').classList.add('on')},close=()=>{LOCK=0;$('#ov').classList.remove('on')};
 function selN(){return Object.values(cur.sel).reduce((a,b)=>a+b,0)}
-function tot(){const{p,q,sel}=cur;if(p.singleChoice)return((+p.price||0)+p.opts.reduce((a,o,i)=>a+(sel[i]?+o.p||0:0),0))*q;return(has(p)?p.opts.reduce((a,o,i)=>a+(sel[i]||0)*o.p,0):p.price)*q}
+function tot(){const{p,q,sel}=cur;if(p.optionGroups&&p.optionGroups.length)return((+p.price||0)+p.optionGroups.reduce((a,g,gi)=>{const oi=cur.groupSel&&cur.groupSel[gi],o=oi===undefined?null:g.options[oi];return a+(o&&!o.so?(+o.p||0):0)},0))*q;if(p.singleChoice)return((+p.price||0)+p.opts.reduce((a,o,i)=>a+(sel[i]?+o.p||0:0),0))*q;return(has(p)?p.opts.reduce((a,o,i)=>a+(sel[i]||0)*o.p,0):p.price)*q}
 function optionsH(p,n){
 if(!has(p))return '';
 if(p.singleChoice)return '<div class="gh"><b>Escolha o sabor:</b><em>OBRIGATÓRIO • 1 opção</em></div><div class="flavor-list" role="radiogroup" aria-label="Escolha um sabor">'+p.opts.map((o,i)=>{const selected=!!cur.sel[i];return '<button type="button" class="flavor-option'+(selected?' on':'')+'" role="radio" aria-checked="'+selected+'" data-choice="'+i+'" '+(o.so?'disabled':'')+'><span class="flavor-radio" aria-hidden="true">'+(selected?'✓':'')+'</span><span class="flavor-name">'+esc(o.n)+'</span><small>'+(o.so?'EM FALTA':'Incluído')+'</small></button>'}).join('')+'</div>';
 return '<div class="gh"><b>Escolha uma opção:</b><span class="cnt'+(n?' ok':'')+'">'+n+'/'+MAX+'</span><em>OBRIGATÓRIO</em><small>Escolha de 1 a '+MAX+' opções</small></div>'+p.opts.map((o,i)=>'<div class="op"><div>'+esc(o.n)+'<small>+ '+R(o.p)+'</small></div>'+(o.so?'<span class="fa">EM FALTA</span>':'<div class="st">'+(cur.sel[i]?'<button data-m="'+i+'">−</button><span>'+cur.sel[i]+'</span>':'')+'<button data-p="'+i+'" '+(n>=MAX?'disabled':'')+'>+</button></div>')+'</div>').join('');
 }
-function sheet(){const o=$('#obs');if(o)cur.obs=o.value;const{p,q,sel,obs}=cur,n=selN(),ok=!has(p)||n>=1;
+function sheet(){const o=$('#obs');if(o)cur.obs=o.value;const{p,q,sel,obs}=cur,n=selN(),groupsOk=!p.optionGroups||p.optionGroups.every((g,i)=>!g.required||(cur.groupSel&&cur.groupSel[i]!==undefined)),ok=p.optionGroups?groupsOk:!has(p)||n>=1;
 open(`<div class="sc"><div style="position:relative"><div class="im big">${img(p)}</div><button class="x" data-x>✕</button></div><div class="pad"><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p><div>${priceH(p)}</div></div>
 ${optionsH(p,n)}
 <div class="pad"><label>Alguma observação? <span>${(obs||'').length} / 140</span></label><textarea id="obs" maxlength="140" oninput="this.previousElementSibling.lastChild.textContent=this.value.length+' / 140'">${esc(obs||'')}</textarea></div></div>
 <div class="ft"><div class="st"><button data-q="-1" ${q<2?'disabled':''}>−</button><span>${q}</span><button data-q="1">+</button></div><button class="btn" data-a="add" ${ok?'':'disabled'}>Adicionar<span>${R(tot())}</span></button></div>`)}
-function addCart(){cur.obs=$('#obs').value;const{p,q,sel,obs}=cur;S.cart.push({pid:p.id,em:p.em||'🍽️',sel:{...sel},name:p.name,q,total:tot(),obs,opts:has(p)?p.opts.map((o,i)=>sel[i]?`${sel[i]}x ${o.n}`:'').filter(Boolean):[]});save();close();render();toast('Adicionado à sacola')}
+function selectedOptions(p){if(p.optionGroups&&p.optionGroups.length)return p.optionGroups.flatMap((g,gi)=>{const oi=cur.groupSel&&cur.groupSel[gi];return oi===undefined?[]:[`${g.name}: ${g.options[oi].n}`]});return has(p)?p.opts.map((o,i)=>cur.sel[i]?`${cur.sel[i]}x ${o.n}`:'').filter(Boolean):[]}
+function addCart(){cur.obs=$('#obs').value;const{p,q,sel,obs}=cur;S.cart.push({pid:p.id,em:p.em||'🍽️',sel:{...sel},groupSel:{...(cur.groupSel||{})},name:p.name,q,total:tot(),obs,opts:selectedOptions(p)});save();close();render();toast('Adicionado à sacola')}function addCart(){cur.obs=$('#obs').value;const{p,q,sel,obs}=cur;S.cart.push({pid:p.id,em:p.em||'🍽️',sel:{...sel},groupSel:{...(cur.groupSel||{})},name:p.name,q,total:tot(),obs,opts:selectedOptions(p)});save();close();render();toast('Adicionado à sacola')}
 function editor(id){const p=id?S.products.find(x=>x.id===id):null;ed=p?{...p}:{cat:S.cats[0]?.id,em:'🍽️'};delArm=0;
 open(`<div class="sc"><div class="pad f"><h3>${p?'Editar produto':'Novo produto'}</h3>
 <label>Nome</label><input id="f-n" value="${esc(ed.name)}"><label>Descrição</label><textarea id="f-d">${esc(ed.desc)}</textarea>
@@ -77,13 +78,14 @@ const p={...ed,name:n,desc:g('f-d'),cat:$('#f-c').value,price:num(g('f-p')),old:
 if(!opts.length&&!p.price)return toast('Informe o preço');
 if(!p.id){p.id='p'+Date.now();S.products.push(p)}else S.products[S.products.findIndex(x=>x.id===p.id)]=p;save();close();render();toast('Produto salvo')}
 function pick(f){const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const s=Math.min(1,420/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*s;c.height=i.height*s;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ed.img=c.toDataURL('image/jpeg',.7);$('#pv').innerHTML=`<img src="${ed.img}">`};i.src=r.result};r.readAsDataURL(f)}
-document.addEventListener('click',e=>{const t=e.target.closest('[data-t],[data-o],[data-e],[data-x],[data-a],[data-p],[data-m],[data-q],[data-dm],[data-pm],[data-md],[data-choice]');if(e.target.id==='ov')return LOCK?0:close();if(!t)return;const d=t.dataset;
+document.addEventListener('click',e=>{const t=e.target.closest('[data-t],[data-o],[data-e],[data-x],[data-a],[data-p],[data-m],[data-q],[data-dm],[data-pm],[data-md],[data-choice],[data-group-index],[data-group-choice]');if(e.target.id==='ov')return LOCK?0:close();if(!t)return;const d=t.dataset;
 if(d.pm){PM=d.pm;document.querySelectorAll('[data-pm]').forEach(b=>b.classList.toggle('on',b.dataset.pm===PM));$('#pmi').textContent=pmInfo();return}
 if(d.md){MD=d.md;document.querySelectorAll('[data-md]').forEach(b=>b.classList.toggle('on',b.dataset.md===MD));$('#adw').hidden=MD!=='entrega';$('#mdi').innerHTML=mdInfo();$('#tt').innerHTML=totH();return}
 if(d.t){tab=d.t;scrollTo(0,0);return render()}
 if(d.e!==undefined){e.stopPropagation();return editor(d.e)}
+if(d.groupIndex!==undefined){cur.groupSel={...cur.groupSel,[d.groupIndex]:+d.groupChoice};return sheet()}
 if(d.choice!==undefined){cur.sel={[d.choice]:1};return sheet()}
-if(d.o){const p=S.products.find(x=>x.id===d.o);if(p&&!p.so){cur={p,q:1,sel:{},obs:''};sheet()}else if(p)toast('Produto esgotado');return}
+if(d.o){const p=S.products.find(x=>x.id===d.o);if(p&&!p.so){cur={p,q:1,sel:{},groupSel:{},obs:''};sheet()}else if(p)toast('Produto esgotado');return}
 if(d.x!==undefined){close();setTimeout(maybeNoticePrompt,150);return}
 if(d.p!==undefined){cur.sel[d.p]=(cur.sel[d.p]||0)+1;return sheet()}
 if(d.m!==undefined){cur.sel[d.m]--;if(!cur.sel[d.m])delete cur.sel[d.m];return sheet()}
@@ -216,7 +218,8 @@ if(os.length)h+=`<h2>${adm?'Pedidos recebidos':'Acompanhe seu pedido'}</h2>${os.
 const cfgData=()=>({cats:S.cats,products:S.products,zones:S.zones,pick:S.pick});
 let pt;const pushCfg=()=>{clearTimeout(pt);pt=setTimeout(()=>merchant('config',{config:cfgData()}).catch(()=>toast('Falha ao sincronizar o cardápio')),700)};
 const FLAVOR_OPTIONS=['Doce de leite','Baunilha','Chocolate','Cookies & cream','Morango'].map(n=>({n,p:0}));
-const applyCfg=c=>{S.cats=c.cats||[];S.products=c.products||[];S.zones=c.zones||S.zones;S.pick=c.pick||S.pick;let migrated=false;const batida=S.products.find(p=>p.id==='p9'||/batida proteica/i.test(p.name||''));if(batida){if(!batida.singleChoice){batida.singleChoice=true;migrated=true}if(!Array.isArray(batida.opts)||!batida.opts.length){batida.opts=FLAVOR_OPTIONS.map(o=>({...o}));migrated=true}}try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}if(migrated&&adm&&TOK)pushCfg();return migrated};
+const FLAVOR_GROUPS=[{name:'Sabor',required:true,options:['Amora','Limão siciliano','Abacaxi'].map(n=>({n,p:0}))},{name:'Potencializador de sabor',required:true,options:['Uva','Laranja','Manga','Maracujá','Abacaxi','Limão'].map(n=>({n,p:0}))}];
+const applyCfg=c=>{S.cats=c.cats||[];S.products=c.products||[];S.zones=c.zones||S.zones;S.pick=c.pick||S.pick;let migrated=false;const batida=S.products.find(p=>p.id==='p9'||/batida proteica/i.test(p.name||''));if(batida){if(!batida.singleChoice){batida.singleChoice=true;migrated=true}if(!Array.isArray(batida.opts)||!batida.opts.length){batida.opts=FLAVOR_OPTIONS.map(o=>({...o}));migrated=true}}for(const p of S.products){const isTargetDrink=/hype drink/i.test(p.name||'')||/^reset turbo\b/i.test(p.name||'');const isTargetCombo=/^combo\b/i.test(p.name||'')&&/hype drink|reset turbo/i.test(p.desc||'');if((isTargetDrink||isTargetCombo)&&(!Array.isArray(p.optionGroups)||!p.optionGroups.length)){p.optionGroups=FLAVOR_GROUPS.map(g=>({...g,options:g.options.map(o=>({...o}))}));migrated=true}}try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}if(migrated&&adm&&TOK)pushCfg();return migrated};
 async function loadCfg(){try{const c=await fb('GET','config');if(!c||!c.products)return;const j=JSON.stringify(c);if(j===lastCfg)return;lastCfg=j;applyCfg(c);render()}catch(e){}}
 async function signin(em,pw){const r=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+FB.key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw,returnSecureToken:true})}),j=await r.json();if(!j.idToken)throw new Error('login');TOK=j.idToken;CRED={em,pw}}
 const merchant=(action,data={})=>fetch('/api/merchant',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOK},body:JSON.stringify({action,...data})}).then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);return j});
